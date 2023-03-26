@@ -1,3 +1,4 @@
+-- Datbase Name
 USE Town1;
 
 CREATE TABLE Product
