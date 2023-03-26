@@ -11,7 +11,7 @@ FROM Town1.dbo.Sales
 GROUP BY Date
 ORDER BY MinSales ASC;
 
--- This gives lowest sales irrespective of dates
+-- This gives lowest sales irrespective of duplicate dates
 SELECT TOP 3 Date, Sales
 FROM Town1.dbo.Sales
 ORDER BY Sales ASC;
