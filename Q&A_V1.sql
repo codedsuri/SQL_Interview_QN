@@ -26,3 +26,21 @@ FROM
 ) AS x
 WHERE x.RNK = 1
 ORDER BY Sales ASC;
+
+
+-- Ques3. What is the total sales and units of OnePlus phones?
+USE Town1;
+WITH InnSales (ProductCode, TotalSales) AS
+(
+SELECT ProductCode, SUM(Sales) as TotalSales
+FROM Sales
+GROUP BY ProductCode )
+
+SELECT X.Brand_Name, X.TotalSalesAmt, TotalSalesAmt/X.TotalUnitPrice AS UnitSold
+FROM
+(
+	SELECT P.BrandName as Brand_Name, SUM(InnSales.TotalSales) AS TotalSalesAmt, SUM(P.UnitPrice) AS TotalUnitPrice 
+	FROM InnSales
+	JOIN Product P
+	ON InnSales.ProductCode= P.ProductCode
+	GROUP BY P.BrandName)X;
