@@ -43,4 +43,37 @@ FROM
 	FROM InnSales
 	JOIN Product P
 	ON InnSales.ProductCode= P.ProductCode
-	GROUP BY P.BrandName)X;
+	GROUP BY P.BrandName)X
+WHERE X.Brand_Name= 'OnePlus';
+
+------ OR 
+
+SELECT P.BrandName , SUM(X.TotalSales) AS SalesAmount, SUM(X.TotalSales)/SUM(P.UnitPrice) AS QTYSold
+FROM
+(
+	SELECT ProductCode, SUM(Sales) AS TotalSales
+	FROM Town1.dbo.Sales
+	GROUP BY ProductCode) X
+JOIN 
+Town1.dbo.Product P
+	ON X.ProductCode = P.ProductCode
+WHERE P.BrandName = 'OnePlus'
+GROUP BY P.BrandName
+
+---Ques4. 4. Which products had the highest sales under each brand?
+
+SELECT Z.BrandName, Z.ProductCode, Z.TotalSales
+FROM
+(
+	SELECT Y.*,
+	DENSE_RANK() OVER (PARTITION BY Y.BrandName ORDER BY Y.TotalSales ASC) AS RNK 
+	FROM 
+	( SELECT P.BrandName, P.ProductCode, X.TotalSales
+	   FROM
+		(	SELECT ProductCode, SUM(Sales) AS TotalSales
+			FROM Town1.dbo.Sales
+			GROUP BY ProductCode) X
+			JOIN 
+			Town1.dbo.Product P
+			ON X.ProductCode = P.ProductCode) Y) Z
+WHERE RNK >1;
