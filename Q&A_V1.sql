@@ -60,7 +60,7 @@ Town1.dbo.Product P
 WHERE P.BrandName = 'OnePlus'
 GROUP BY P.BrandName
 
----Ques4. 4. Which products had the highest sales under each brand?
+---Ques4. Which products had the highest sales under each brand?
 
 SELECT Z.BrandName, Z.ProductCode, Z.TotalSales
 FROM
@@ -77,3 +77,39 @@ FROM
 			Town1.dbo.Product P
 			ON X.ProductCode = P.ProductCode) Y) Z
 WHERE RNK >1;
+
+SELECT Y.*
+FROM(
+	SELECT X.*, DENSE_RANK() OVER(PARTITION BY X.BrandName ORDER BY X.SalesAmt DESC) AS RNK
+	FROM(
+		SELECT P.BrandName, S.ProductCode, SUM(S.Sales) AS SalesAmt
+		FROM Sales S
+		JOIN 
+		Product P
+		ON S.ProductCode = P.ProductCode
+		GROUP BY P.BrandName, S.ProductCode)X)Y
+WHERE Y.RNK = 1;
+
+-- Ques 5. Which Customer had the highest average purchase value at a day level?
+
+SELECT Y.Date, Y.CustomerName, Y.AVGPrice
+FROM 
+( SELECT X.*, ROW_NUMBER() OVER(PARTITION BY Date ORDER BY AVGPrice DESC) AS RWNum
+  FROM
+	(	SELECT S.Date, C.CustomerName, AVG(S.Sales) AS AVGPrice
+		FROM Town1.dbo.Customer C
+		JOIN
+		Town1.dbo.Sales S
+		ON C.CustomerCode = S.CustomerCode
+		GROUP BY S.Date, C.CustomerName
+	)X
+)Y
+WHERE RWNum= 1;
+
+-- 6. What is the total number of phones sold to customers without memberships?
+
+SELECT COUNT(S.ProductCode) AS SoldQTY
+FROM Town1.dbo.Sales S
+JOIN Town1.dbo.Customer C
+ON S.CustomerCode = C.CustomerCode
+WHERE C.MembershipFlag = 1
